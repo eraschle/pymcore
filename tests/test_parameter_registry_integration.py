@@ -91,9 +91,13 @@ class TestParameterRegistryIntegration:
 
         # Create mapping for pole elements
         pole_mapping = ParameterMapping("pole")
-        parameter = ParameterMetadata(name="height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        parameter = ParameterMetadata(
+            name="height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
         pole_mapping.add_parameter(role=ParameterRole.PRIMARY_HEIGHT, parameter=parameter)
-        parameter = ParameterMetadata(name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        parameter = ParameterMetadata(
+            name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
         pole_mapping.add_parameter(role=ParameterRole.DIAMETER, parameter=parameter)
         parameter = ParameterMetadata(name="material", value_type=ValueType.FLOAT, unit=Unit.NONE)
         pole_mapping.add_parameter(role=ParameterRole.MATERIAL_TYPE, parameter=parameter)
@@ -120,7 +124,9 @@ class TestParameterRegistryIntegration:
         # Register both ENUM and custom parameters
         registry.register_from_enum(ParameterRole)
 
-        custom_desc = ParameterDescriptor(semantic_key="special_coating", data_type=str, unit=Unit.NONE, required=False)
+        custom_desc = ParameterDescriptor(
+            semantic_key="special_coating", data_type=str, unit=Unit.NONE, required=False
+        )
         registry.register_parameter(custom_desc)
 
         # Test lookup of ENUM-derived parameter

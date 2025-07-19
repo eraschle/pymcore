@@ -226,7 +226,9 @@ class HybridParameterInterface:
         return config
 
     @classmethod
-    def from_configuration(cls, element: GenericElement, config_data: dict[str, Any]) -> HybridParameterInterface:
+    def from_configuration(
+        cls, element: GenericElement, config_data: dict[str, Any]
+    ) -> HybridParameterInterface:
         """
         Create interface from configuration data.
 

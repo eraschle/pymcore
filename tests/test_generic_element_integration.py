@@ -18,9 +18,7 @@ class TestGenericElementIntegration:
     def test_parameter_operations_with_unit_conversion(self):
         """Test basic parameter operations with automatic unit conversion."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(
-            "height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
+        element.define_parameter("height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         # Set parameter with unit conversion (12m -> mm)
         element.set_value("height", 12.0, unit=Unit.METER)
@@ -38,9 +36,7 @@ class TestGenericElementIntegration:
     def test_parameter_sync_with_geometry_descriptor(self):
         """Test that geometry descriptors automatically sync with parameters."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(
-            "height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
+        element.define_parameter("height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
         # Set height parameter directly
         element.set_value("height", 15000.0, Unit.MILLIMETER)
 
@@ -57,9 +53,7 @@ class TestGenericElementIntegration:
     def test_invalid_unit_conversion_raises_exception(self):
         """Test that invalid unit conversions raise proper exceptions."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(
-            "height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
+        element.define_parameter("height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         # Try to set length parameter with mass unit
         with pytest.raises(UnitConversionError):
@@ -68,9 +62,7 @@ class TestGenericElementIntegration:
     def test_parameter_metadata_storage(self):
         """Test that parameter metadata (units, types) is properly stored."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(
-            "height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
+        element.define_parameter("height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         # Set parameter with metadata
         element.set_value("height", 12000.0, Unit.MILLIMETER)
@@ -85,15 +77,9 @@ class TestGenericElementIntegration:
     def test_element_serialization_roundtrip(self):
         """Test that elements can be serialized and deserialized correctly."""
         original = GenericElement("pole_001", "pole")
-        original.define_parameter(
-            "height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
-        original.define_parameter(
-            "diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
-        original.define_parameter(
-            "material", value_type=ValueType.STRING, unit=Unit.NONE
-        )
+        original.define_parameter("height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        original.define_parameter("diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        original.define_parameter("material", value_type=ValueType.STRING, unit=Unit.NONE)
         original.set_value("height", 12000.0, Unit.MILLIMETER)
         original.set_value("diameter", 300.0, Unit.MILLIMETER)
         original.set_value("material", "steel", Unit.NONE)
@@ -126,12 +112,8 @@ class TestGenericElementIntegration:
     def test_geometry_container_automatic_creation(self):
         """Test that geometry container is automatically created when needed."""
         element = GenericElement("foundation_001", "foundation")
-        element.define_parameter(
-            "width", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
-        element.define_parameter(
-            "length", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
-        )
+        element.define_parameter("width", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter("length", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
         element.define_parameter("depth", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         # Setting geometric parameters should auto-create geometry

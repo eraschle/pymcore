@@ -329,7 +329,10 @@ class ParameterRegistry:
         key_lower = semantic_key.lower()
 
         # Railway-specific patterns take precedence
-        if any(rail in key_lower for rail in ["gauge", "rail", "track", "sleeper", "cantilever", "curve"]):
+        if any(
+            rail in key_lower
+            for rail in ["gauge", "rail", "track", "sleeper", "cantilever", "curve"]
+        ):
             if "spacing" in key_lower or "radius" in key_lower:
                 return float, Unit.MILLIMETER, "railway"
             elif "profile" in key_lower:

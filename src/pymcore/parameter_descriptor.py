@@ -53,4 +53,6 @@ class ParameterDescriptor:
 
         # Validate unit compatibility
         if not value_type.is_compatible_with_unit(self.unit):
-            raise ValueError(f"Data type {self.data_type.__name__} is not compatible with unit {self.unit.name}")
+            raise ValueError(
+                f"Data type {self.data_type.__name__} is not compatible with unit {self.unit.name}"
+            )

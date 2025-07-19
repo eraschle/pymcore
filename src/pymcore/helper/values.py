@@ -247,7 +247,9 @@ def as_bool(value: Any) -> bool:
         elif value == 1 or value == 1.0:
             return True
         else:
-            raise ValueConversionError(f"Cannot convert numeric value {value} to bool (only 0/1 allowed)")
+            raise ValueConversionError(
+                f"Cannot convert numeric value {value} to bool (only 0/1 allowed)"
+            )
 
     if isinstance(value, str):
         lower_value = value.lower()

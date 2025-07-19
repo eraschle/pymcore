@@ -15,7 +15,7 @@ from .values import (
 __all__ = [
     "is_int",
     "as_int",
-    "is_str", 
+    "is_str",
     "as_str",
     "is_float",
     "as_float",

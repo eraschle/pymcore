@@ -55,7 +55,9 @@ class TestHybridParameterInterfaceIntegration:
         )
 
         # Create interface with ENUM mapping only
-        interface = HybridParameterInterface(element=element, mapping_name="pole", enum_mapping=pole_mapping)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", enum_mapping=pole_mapping
+        )
         interface._resolve_enum_parameter(ParameterRole.PRIMARY_HEIGHT)
 
         # Set values using ENUM
@@ -92,7 +94,9 @@ class TestHybridParameterInterfaceIntegration:
     def test_plugin_mode_parameter_access(self):
         """Test parameter access using Plugin/Registry mode only."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(
+            name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
         element.define_parameter(name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
         element.define_parameter(name="material_type", value_type=ValueType.STRING, unit=Unit.NONE)
 
@@ -101,7 +105,9 @@ class TestHybridParameterInterfaceIntegration:
         registry.register_from_enum(ParameterRole)
 
         # Create interface with registry only
-        interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", registry=registry
+        )
 
         # Set values using string keys (Plugin mode)
         interface.set_value("primary_height", 15000.0)
@@ -171,14 +177,18 @@ class TestHybridParameterInterfaceIntegration:
     def test_smart_dispatcher_enum_vs_string(self):
         """Test that interface correctly dispatches ENUM vs string access."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(
+            name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
         element.define_parameter(name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         # Use registry for both ENUM and string access
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
-        interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", registry=registry
+        )
         registry.register_from_enum(ParameterRole)
         # Set using ENUM
         interface.set_value(ParameterRole.PRIMARY_HEIGHT, 12000.0)
@@ -201,12 +211,16 @@ class TestHybridParameterInterfaceIntegration:
     def test_unit_conversion_through_interface(self):
         """Test that unit conversion works through the interface."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(
+            name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
-        interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", registry=registry
+        )
 
         # Set height in meters (will be stored in first-used unit)
         interface.set_value_with_unit("primary_height", 12.0, Unit.METER)
@@ -221,12 +235,16 @@ class TestHybridParameterInterfaceIntegration:
     def test_parameter_validation_through_interface(self):
         """Test parameter validation through the interface."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(
+            name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
-        interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", registry=registry
+        )
 
         # Valid numeric value should work
         interface.set_value("primary_height", 12000.0)
@@ -241,12 +259,16 @@ class TestHybridParameterInterfaceIntegration:
     def test_default_value_handling(self):
         """Test proper handling of default values."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(
+            name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER
+        )
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
-        interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", registry=registry
+        )
 
         # Get non-existent parameter with default
         value = interface.get_value("non_existent", default=999.0)
@@ -259,13 +281,17 @@ class TestHybridParameterInterfaceIntegration:
     def test_interface_serialization_roundtrip(self):
         """Test that interface state can be serialized and restored."""
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(name="primary_height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        element.define_parameter(
+            name="primary_height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
+        )
         element.define_parameter(name="material_type", unit=Unit.NONE, value_type=ValueType.STRING)
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
-        interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
+        interface = HybridParameterInterface(
+            element=element, mapping_name="pole", registry=registry
+        )
 
         # Set some values
         interface.set_value("primary_height", 12000.0)
@@ -276,7 +302,9 @@ class TestHybridParameterInterfaceIntegration:
 
         # Create new interface from configuration
         new_element = GenericElement.from_dict(element.to_dict())
-        new_interface = HybridParameterInterface.from_configuration(element=new_element, config_data=config_data)
+        new_interface = HybridParameterInterface.from_configuration(
+            element=new_element, config_data=config_data
+        )
 
         # Verify values are preserved
         assert new_interface.get_value("primary_height") == 12000.0

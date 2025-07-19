@@ -78,7 +78,9 @@ class UnitConverter:
         to_factor = self._to_base_factors.get(to_unit)
 
         if from_factor is None or to_factor is None:
-            raise UnitConversionError(f"No conversion factor available for {from_unit.name} or {to_unit.name}")
+            raise UnitConversionError(
+                f"No conversion factor available for {from_unit.name} or {to_unit.name}"
+            )
 
         # Convert: value -> base unit -> target unit
         base_value = value * from_factor
