@@ -6,9 +6,9 @@ for railway infrastructure parameters.
 """
 import pytest
 from enum import Enum
-from src.pymcore.parameter_registry import ParameterRegistry, ParameterMapping
-from src.pymcore.parameter_descriptor import ParameterDescriptor
-from src.pymcore.types import UnitType, ValueType
+from pymcore.parameter_registry import ParameterRegistry, ParameterMapping
+from pymcore.parameter_descriptor import ParameterDescriptor
+from pymcore.types import UnitType, ValueType
 
 
 class ParameterRole(Enum):

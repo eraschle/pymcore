@@ -5,10 +5,10 @@ Tests focus on ensuring that geometry properties automatically sync with
 underlying parameters without requiring explicit synchronization.
 """
 import pytest
-from src.pymcore.generic_element import GenericElement
-from src.pymcore.parameter_descriptor import ParameterDescriptor
-from src.pymcore.types import ValueType, UnitType
-from src.pymcore.unit_converter import UnitConversionError
+from pymcore.generic_element import GenericElement
+from pymcore.parameter_descriptor import ParameterDescriptor
+from pymcore.types import ValueType, UnitType
+from pymcore.unit_converter import UnitConversionError
 
 
 class TestGenericElementIntegration:
