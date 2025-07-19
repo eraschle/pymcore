@@ -3,7 +3,6 @@ Unit conversion system for PyM Core.
 
 Provides safe unit conversions with error handling for incompatible types.
 """
-from typing import Dict
 from .types import UnitType
 
 
@@ -23,7 +22,7 @@ class UnitConverter:
     def __init__(self):
         """Initialize the unit converter with conversion factors."""
         # Conversion factors to base units (meter for length, kg for mass)
-        self._to_base_factors: Dict[UnitType, float] = {
+        self._to_base_factors: dict[UnitType, float] = {
             # Length units (base: meter)
             UnitType.MILLIMETER: 0.001,
             UnitType.METER: 1.0,

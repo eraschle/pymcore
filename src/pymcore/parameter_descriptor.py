@@ -3,8 +3,9 @@ Parameter descriptor definitions for PyM Core.
 
 Provides structured parameter definitions for the registry system.
 """
+from __future__ import annotations
 from dataclasses import dataclass
-from typing import Optional, Type
+from typing import Type
 from .types import ValueType, UnitType
 
 
@@ -28,10 +29,10 @@ class ParameterDescriptor:
     required: bool = True
     """Whether this parameter is required for the element type."""
     
-    default_value: Optional[object] = None
+    default_value: object | None = None
     """Default value if parameter is not provided."""
     
-    description: Optional[str] = None
+    description: str | None = None
     """Human-readable description of the parameter."""
     
     def __post_init__(self):

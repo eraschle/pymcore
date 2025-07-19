@@ -4,7 +4,8 @@ Geometry system for PyM Core.
 Provides descriptor-based geometry properties that automatically sync
 with element parameters without requiring explicit synchronization.
 """
-from typing import TYPE_CHECKING, Optional
+from __future__ import annotations
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from .generic_element import GenericElement
@@ -32,14 +33,14 @@ class ParameterDescriptor:
         self.parameter_name = parameter_name
         self.default_value = default_value
     
-    def __get__(self, obj: Optional['ElementGeometry'], objtype=None) -> float:
+    def __get__(self, obj: ElementGeometry | None, objtype=None) -> float:
         """Get parameter value from element."""
         if obj is None:
             return self
         
         return obj._element.get_parameter(self.parameter_name, self.default_value)
     
-    def __set__(self, obj: 'ElementGeometry', value: float) -> None:
+    def __set__(self, obj: ElementGeometry, value: float) -> None:
         """Set parameter value in element."""
         from .types import UnitType, ValueType
         obj._element.set_parameter(
@@ -65,7 +66,7 @@ class ElementGeometry:
     depth = ParameterDescriptor("depth")
     diameter = ParameterDescriptor("diameter")
     
-    def __init__(self, element: 'GenericElement'):
+    def __init__(self, element: GenericElement):
         """
         Initialize geometry linked to an element.
         

@@ -3,7 +3,8 @@ Generic element implementation for PyM Core.
 
 Provides universal container with parameter management and geometry synchronization.
 """
-from typing import Any, Dict, Optional
+from __future__ import annotations
+from typing import Any
 from .types import ValueType, UnitType
 from .unit_converter import UnitConverter, UnitConversionError
 from .geometry import ElementGeometry
@@ -30,18 +31,18 @@ class GenericElement:
         """
         self.element_id = element_id
         self.element_type = element_type
-        self._parameters: Dict[str, Any] = {}
-        self._parameter_metadata: Dict[str, Dict[str, Any]] = {}
-        self._containers: Dict[str, Any] = {}
+        self._parameters: dict[str, Any] = {}
+        self._parameter_metadata: dict[str, dict[str, Any]] = {}
+        self._containers: dict[str, Any] = {}
         self._unit_converter = UnitConverter()
-        self._geometry: Optional[ElementGeometry] = None
+        self._geometry: ElementGeometry | None = None
     
     def set_parameter(
         self, 
         name: str, 
         value: Any, 
         unit: UnitType = UnitType.NONE,
-        target_unit: Optional[UnitType] = None,
+        target_unit: UnitType | None = None,
         value_type: ValueType = ValueType.FLOAT
     ) -> None:
         """
@@ -98,7 +99,7 @@ class GenericElement:
         self, 
         name: str, 
         default: Any = None,
-        return_unit: Optional[UnitType] = None
+        return_unit: UnitType | None = None
     ) -> Any:
         """
         Get a parameter value with optional unit conversion.
@@ -132,7 +133,7 @@ class GenericElement:
         
         return value
     
-    def get_parameter_metadata(self, name: str) -> Dict[str, Any]:
+    def get_parameter_metadata(self, name: str) -> dict[str, Any]:
         """
         Get metadata for a parameter.
         
@@ -143,7 +144,7 @@ class GenericElement:
             
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             Parameter metadata including unit, type, and value
         """
         return self._parameter_metadata.get(name, {}).copy()
@@ -164,7 +165,7 @@ class GenericElement:
         """
         return name in self._parameters
     
-    def get_geometry(self) -> 'ElementGeometry':
+    def get_geometry(self) -> ElementGeometry:
         """
         Get geometry container with synchronized parameter access.
         
@@ -183,13 +184,13 @@ class GenericElement:
         if self._geometry is not None:
             self._geometry._sync_from_parameters()
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """
         Serialize element to dictionary.
         
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             Serialized element data
         """
         return {
@@ -201,13 +202,13 @@ class GenericElement:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'GenericElement':
+    def from_dict(cls, data: dict[str, Any]) -> GenericElement:
         """
         Deserialize element from dictionary.
         
         Parameters
         ----------
-        data : Dict[str, Any]
+        data : dict[str, Any]
             Serialized element data
             
         Returns
