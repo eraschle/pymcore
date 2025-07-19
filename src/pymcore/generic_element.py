@@ -6,15 +6,16 @@ Provides universal container with parameter management and geometry synchronizat
 
 from __future__ import annotations
 
-from enum import Enum
 import logging
 from dataclasses import dataclass
+from enum import Enum
 from typing import Any
+
+from pydantic import BaseModel, Field
 
 from .geometry import ElementGeometry
 from .types import Unit, ValueType
 from .unit_converter import UnitConversionError, UnitConverter
-from pydantic import BaseModel, Field
 
 log = logging.getLogger(__name__)
 

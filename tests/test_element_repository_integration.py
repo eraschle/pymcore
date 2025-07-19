@@ -5,12 +5,14 @@ Tests focus on JSON serialization, object reference handling,
 and container registry integration with file I/O operations.
 """
 
-import pytest
-import tempfile
 import os
+import tempfile
+
+import pytest
+
+from pymcore.container_extension import ContainerExtension, ContainerRegistry
 from pymcore.element_repository import ElementRepository, RepositoryError
 from pymcore.generic_element import GenericElement
-from pymcore.container_extension import ContainerRegistry, ContainerExtension
 from pymcore.types import Unit, ValueType
 
 

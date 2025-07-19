@@ -5,12 +5,11 @@ Domain-specific implementations for railway infrastructure using
 PyM Core components with ENUM-based parameter access.
 """
 
-from os import name
-from typing import Any, Optional
+from typing import Any
 
-from annotated_types import Unit
 from pymcore import GenericElement, HybridParameterInterface, ParameterRegistry
 from pymcore.types import Unit, ValueType
+
 from .railway_parameters import RailwayParameters
 
 

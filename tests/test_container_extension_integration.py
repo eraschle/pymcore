@@ -6,10 +6,11 @@ and lazy loading capabilities without Core knowing container specifics.
 """
 
 import pytest
+
 from pymcore.container_extension import (
     ContainerExtension,
-    ContainerRegistry,
     ContainerNotFoundError,
+    ContainerRegistry,
 )
 from pymcore.generic_element import GenericElement
 from pymcore.types import Unit, ValueType

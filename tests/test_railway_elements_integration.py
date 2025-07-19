@@ -5,9 +5,8 @@ Tests the complete integration of PyM Application Layer with Core components,
 demonstrating ENUM-based parameter access and repository operations.
 """
 
-import pytest
-from pymapp import Pole, Foundation, Track, Cantilever, Sleeper, RailwayParameters
-from pymcore import ElementRepository, ContainerRegistry
+from pymapp import Cantilever, Foundation, Pole, RailwayParameters, Sleeper, Track
+from pymcore import ContainerRegistry, ElementRepository
 from pymcore.types import Unit
 
 

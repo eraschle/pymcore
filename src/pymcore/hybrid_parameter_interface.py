@@ -6,13 +6,13 @@ automatic dispatching and proper exception handling for conflicts.
 """
 
 from __future__ import annotations
-import logging
-from inspect import Parameter
-from typing import Any
-from enum import Enum
 
-from .generic_element import GenericElement, ParameterMetadata
-from .parameter_registry import ParameterRegistry, ParameterMapping
+import logging
+from enum import Enum
+from typing import Any
+
+from .generic_element import GenericElement
+from .parameter_registry import ParameterMapping, ParameterRegistry
 from .types import Unit, ValueType
 
 log = logging.getLogger(__name__)

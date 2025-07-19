@@ -8,6 +8,7 @@ handling for conflicting configurations.
 from enum import Enum
 
 import pytest
+
 from pymcore.generic_element import GenericElement
 from pymcore.hybrid_parameter_interface import (
     HybridParameterInterface,

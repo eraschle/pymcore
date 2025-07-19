@@ -6,10 +6,12 @@ with automatic conversion and validation capabilities.
 """
 
 from __future__ import annotations
-from typing import Type, Any
+
 from enum import Enum
+from typing import Any
 
 from pymcore.generic_element import ParameterMetadata
+
 from .parameter_descriptor import ParameterDescriptor
 from .types import Unit
 
@@ -93,7 +95,7 @@ class ParameterRegistry:
         self._parameters[descriptor.semantic_key] = descriptor
         self._categorize_parameter(descriptor)
 
-    def register_from_enum(self, parameter_enum: Type[Enum]) -> None:
+    def register_from_enum(self, parameter_enum: type[Enum]) -> None:
         """
         Auto-register parameters from an ENUM definition.
 
@@ -322,7 +324,7 @@ class ParameterRegistry:
 
         return registry
 
-    def _infer_parameter_characteristics(self, semantic_key: str) -> tuple[Type, Unit, str]:
+    def _infer_parameter_characteristics(self, semantic_key: str) -> tuple[type, Unit, str]:
         """Infer parameter type, unit, and category from semantic key."""
         key_lower = semantic_key.lower()
 
@@ -344,7 +346,7 @@ class ParameterRegistry:
             # Default assumptions
             return float, Unit.MILLIMETER, "geometric"
 
-    def _infer_type_from_unit(self, unit: Unit) -> Type:
+    def _infer_type_from_unit(self, unit: Unit) -> type:
         """Infer Python type from unit type."""
         if unit == Unit.NONE:
             return str

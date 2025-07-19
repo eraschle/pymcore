@@ -5,9 +5,10 @@ Provides structured parameter definitions for the registry system.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Type
-from .types import ValueType, Unit
+
+from .types import Unit, ValueType
 
 
 @dataclass(frozen=True)
@@ -21,7 +22,7 @@ class ParameterDescriptor:
     semantic_key: str
     """Semantic identifier that matches ENUM values for migration."""
 
-    data_type: Type
+    data_type: type
     """Python type for this parameter (int, float, str, bool)."""
 
     unit: Unit = Unit.NONE

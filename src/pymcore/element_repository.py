@@ -6,12 +6,13 @@ object reference management, and container reconstruction capabilities.
 """
 
 from __future__ import annotations
+
 import json
 import logging
 from typing import Any
 
+from .container_extension import ContainerExtension, ContainerNotFoundError, ContainerRegistry
 from .generic_element import GenericElement
-from .container_extension import ContainerRegistry, ContainerExtension, ContainerNotFoundError
 
 logger = logging.getLogger(__name__)
 
@@ -331,7 +332,7 @@ class ElementRepository:
             raise RepositoryError(f"Unsupported format: {format}")
 
         try:
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Clear current repository

@@ -4,8 +4,9 @@ Type definitions for PyM Core.
 Defines value types and units used in railway infrastructure modeling.
 """
 
+from collections.abc import Callable
 from enum import Enum
-from typing import Any, Callable
+from typing import Any
 
 
 class ValueType(Enum):
@@ -31,7 +32,7 @@ class ValueType(Enum):
             True if compatible, False otherwise
         """
 
-        from pymcore import is_str, as_str, is_int, as_int, is_float, as_float, is_bool, as_bool
+        from pymcore import as_bool, as_float, as_int, as_str, is_bool, is_float, is_int, is_str
 
         if self == ValueType.STRING:
             return (is_str, as_str)

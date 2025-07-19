@@ -6,8 +6,9 @@ and error handling for incompatible conversions.
 """
 
 import pytest
-from pymcore.types import ValueType, Unit
-from pymcore.unit_converter import UnitConverter, UnitConversionError
+
+from pymcore.types import Unit, ValueType
+from pymcore.unit_converter import UnitConversionError, UnitConverter
 
 
 class TestUnitConversionIntegration:
