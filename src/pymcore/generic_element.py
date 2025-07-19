@@ -259,20 +259,91 @@ class GenericElement:
         if self._geometry is not None:
             self._geometry._sync_from_parameters()
     
-    def to_dict(self) -> dict[str, Any]:
+    def _serialize_metadata_for_json(self) -> dict[str, dict[str, Any]]:
+        """
+        Serialize parameter metadata for JSON compatibility.
+        
+        Converts enums to their string values.
+        
+        Returns
+        -------
+        dict[str, dict[str, Any]]
+            JSON-serializable metadata
+        """
+        serialized = {}
+        for param_name, metadata in self._parameter_metadata.items():
+            serialized[param_name] = {}
+            for key, value in metadata.items():
+                if hasattr(value, 'value'):  # Check if it's an enum
+                    serialized[param_name][key] = value.value
+                else:
+                    serialized[param_name][key] = value
+        return serialized
+    
+    def _deserialize_metadata_from_json(self, data: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        """
+        Deserialize parameter metadata from JSON format.
+        
+        Converts string values back to appropriate enums.
+        
+        Parameters
+        ----------
+        data : dict[str, dict[str, Any]]
+            JSON-format metadata
+            
+        Returns
+        -------
+        dict[str, dict[str, Any]]
+            Metadata with proper enum objects
+        """
+        from .types import UnitType, ValueType
+        
+        deserialized = {}
+        for param_name, metadata in data.items():
+            deserialized[param_name] = {}
+            for key, value in metadata.items():
+                if key == "unit" and isinstance(value, str):
+                    # Convert unit string back to UnitType enum
+                    try:
+                        deserialized[param_name][key] = UnitType(value)
+                    except ValueError:
+                        # Fallback if enum value not found
+                        deserialized[param_name][key] = UnitType.NONE
+                elif key == "value_type" and isinstance(value, str):
+                    # Convert value_type string back to ValueType enum
+                    try:
+                        deserialized[param_name][key] = ValueType(value)
+                    except ValueError:
+                        # Fallback if enum value not found
+                        deserialized[param_name][key] = ValueType.FLOAT
+                else:
+                    deserialized[param_name][key] = value
+        return deserialized
+    
+    def to_dict(self, for_json: bool = False) -> dict[str, Any]:
         """
         Serialize element to dictionary.
+        
+        Parameters
+        ----------
+        for_json : bool
+            If True, serialize enums as strings for JSON compatibility
         
         Returns
         -------
         dict[str, Any]
             Serialized element data
         """
+        if for_json:
+            parameter_metadata = self._serialize_metadata_for_json()
+        else:
+            parameter_metadata = self._parameter_metadata.copy()
+            
         return {
             "element_id": self.element_id,
             "element_type": self.element_type,
             "parameters": self._parameters.copy(),
-            "parameter_metadata": self._parameter_metadata.copy(),
+            "parameter_metadata": parameter_metadata,
             "containers": self._containers.copy()
         }
     
@@ -280,6 +351,8 @@ class GenericElement:
     def from_dict(cls, data: dict[str, Any]) -> GenericElement:
         """
         Deserialize element from dictionary.
+        
+        Automatically detects and handles JSON-format enum strings.
         
         Parameters
         ----------
@@ -293,6 +366,20 @@ class GenericElement:
         """
         element = cls(data["element_id"], data["element_type"])
         element._parameters = data.get("parameters", {}).copy()
-        element._parameter_metadata = data.get("parameter_metadata", {}).copy()
         element._containers = data.get("containers", {}).copy()
+        
+        # Handle parameter metadata with potential enum deserialization
+        raw_metadata = data.get("parameter_metadata", {})
+        if raw_metadata:
+            # Check if this looks like JSON-serialized data (string enum values)
+            needs_enum_conversion = any(
+                isinstance(metadata.get("unit"), str) or isinstance(metadata.get("value_type"), str)
+                for metadata in raw_metadata.values()
+            )
+            
+            if needs_enum_conversion:
+                element._parameter_metadata = element._deserialize_metadata_from_json(raw_metadata)
+            else:
+                element._parameter_metadata = raw_metadata.copy()
+        
         return element

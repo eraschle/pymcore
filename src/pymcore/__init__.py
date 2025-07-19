@@ -13,6 +13,7 @@ from .parameter_descriptor import ParameterDescriptor
 from .parameter_registry import ParameterRegistry, ParameterMapping
 from .hybrid_parameter_interface import HybridParameterInterface, ParameterConfigurationError
 from .container_extension import ContainerExtension, ContainerRegistry, ContainerNotFoundError
+from .element_repository import ElementRepository, RepositoryError
 
 __version__ = "0.1.0"
 
@@ -31,5 +32,7 @@ __all__ = [
     "ParameterConfigurationError",
     "ContainerExtension",
     "ContainerRegistry",
-    "ContainerNotFoundError"
+    "ContainerNotFoundError",
+    "ElementRepository",
+    "RepositoryError"
 ]

@@ -47,7 +47,7 @@ class TestParameterRegistryIntegration:
         height_desc = registry.get_parameter("primary_height")
         assert height_desc is not None
         assert height_desc.semantic_key == "primary_height"
-        assert height_desc.data_type == float
+        assert height_desc.data_type is float
         assert height_desc.unit == UnitType.MILLIMETER  # Default for dimensions
 
         # Verify string parameters
@@ -136,7 +136,6 @@ class TestParameterRegistryIntegration:
         registry.register_from_enum(ParameterRole)
 
         # Valid parameter should pass validation
-        height_desc = registry.get_parameter("primary_height")
         assert registry.validate_parameter_value("primary_height", 12000.0)
 
         # Invalid type should fail validation
