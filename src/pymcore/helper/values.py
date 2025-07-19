@@ -143,7 +143,7 @@ def is_float(value: Any) -> TypeGuard[float]:
     TypeGuard[float]
         True if value is or can be converted to float
     """
-    if isinstance(value, (int | float)):
+    if isinstance(value, int | float):
         return True
 
     if isinstance(value, str):
@@ -182,7 +182,7 @@ def as_float(value: Any) -> float:
     if isinstance(value, bool):
         return float(value)
 
-    if isinstance(value, (int | float)):
+    if isinstance(value, int | float):
         return float(value)
 
     if not isinstance(value, str):
@@ -210,7 +210,7 @@ def is_bool(value: Any) -> TypeGuard[bool]:
     if isinstance(value, bool):
         return True
 
-    if isinstance(value, (int | float)):
+    if isinstance(value, int | float):
         return value in (0, 1, 0.0, 1.0)
 
     if isinstance(value, str):
@@ -241,7 +241,7 @@ def as_bool(value: Any) -> bool:
     if isinstance(value, bool):
         return value
 
-    if isinstance(value, (int | float)):
+    if isinstance(value, int | float):
         if value == 0 or value == 0.0:
             return False
         elif value == 1 or value == 1.0:
