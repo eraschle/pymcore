@@ -8,8 +8,10 @@ with automatic conversion and validation capabilities.
 from __future__ import annotations
 from typing import Type, Any
 from enum import Enum
+
+from pymcore.generic_element import ParameterMetadata
 from .parameter_descriptor import ParameterDescriptor
-from .types import UnitType
+from .types import Unit
 
 
 class ParameterMapping:
@@ -29,10 +31,9 @@ class ParameterMapping:
             Type of element this mapping applies to
         """
         self.element_type = element_type
-        self._parameter_names: dict[Enum, str] = {}
-        self._parameter_units: dict[Enum, UnitType] = {}
+        self._parameter_role: dict[Enum, ParameterMetadata] = {}
 
-    def add_parameter(self, role: Enum, parameter_name: str, unit: UnitType) -> None:
+    def add_parameter(self, role: Enum, parameter: ParameterMetadata) -> None:
         """
         Add parameter mapping for an ENUM role.
 
@@ -45,20 +46,21 @@ class ParameterMapping:
         unit : UnitType
             Unit for this parameter
         """
-        self._parameter_names[role] = parameter_name
-        self._parameter_units[role] = unit
+        self._parameter_role[role] = parameter
 
     def get_parameter_name(self, role: Enum) -> str | None:
         """Get parameter name for ENUM role."""
-        return self._parameter_names.get(role)
+        parmeter = self._parameter_role.get(role)
+        return parmeter.name if parmeter else None
 
-    def get_parameter_unit(self, role: Enum) -> UnitType:
+    def get_parameter_unit(self, role: Enum) -> Unit:
         """Get parameter unit for ENUM role."""
-        return self._parameter_units.get(role) or UnitType.NONE
+        parmeter = self._parameter_role.get(role)
+        return parmeter.unit if parmeter else Unit.NONE
 
     def get_all_roles(self) -> list[Enum]:
         """Get all mapped ENUM roles."""
-        return list(self._parameter_names.keys())
+        return list(self._parameter_role.keys())
 
 
 class ParameterRegistry:
@@ -302,7 +304,7 @@ class ParameterRegistry:
 
             # Convert unit value back to UnitType
             unit_value = param_data["unit"]
-            unit = UnitType(unit_value)
+            unit = Unit(unit_value)
 
             descriptor = ParameterDescriptor(
                 semantic_key=param_data["semantic_key"],
@@ -320,34 +322,31 @@ class ParameterRegistry:
 
         return registry
 
-    def _infer_parameter_characteristics(self, semantic_key: str) -> tuple[Type, UnitType, str]:
+    def _infer_parameter_characteristics(self, semantic_key: str) -> tuple[Type, Unit, str]:
         """Infer parameter type, unit, and category from semantic key."""
         key_lower = semantic_key.lower()
 
         # Railway-specific patterns take precedence
-        if any(
-            rail in key_lower
-            for rail in ["gauge", "rail", "track", "sleeper", "cantilever", "curve"]
-        ):
+        if any(rail in key_lower for rail in ["gauge", "rail", "track", "sleeper", "cantilever", "curve"]):
             if "spacing" in key_lower or "radius" in key_lower:
-                return float, UnitType.MILLIMETER, "railway"
+                return float, Unit.MILLIMETER, "railway"
             elif "profile" in key_lower:
-                return str, UnitType.NONE, "railway"
+                return str, Unit.NONE, "railway"
             else:
-                return float, UnitType.MILLIMETER, "railway"
+                return float, Unit.MILLIMETER, "railway"
         elif "capacity" in key_lower or "load" in key_lower:
-            return float, UnitType.KILOGRAM, "railway"
+            return float, Unit.KILOGRAM, "railway"
         elif any(mat in key_lower for mat in ["material", "concrete", "steel"]):
-            return str, UnitType.NONE, "material"
+            return str, Unit.NONE, "material"
         elif any(dim in key_lower for dim in ["height", "width", "length", "depth", "diameter"]):
-            return float, UnitType.MILLIMETER, "geometric"
+            return float, Unit.MILLIMETER, "geometric"
         else:
             # Default assumptions
-            return float, UnitType.MILLIMETER, "geometric"
+            return float, Unit.MILLIMETER, "geometric"
 
-    def _infer_type_from_unit(self, unit: UnitType) -> Type:
+    def _infer_type_from_unit(self, unit: Unit) -> Type:
         """Infer Python type from unit type."""
-        if unit == UnitType.NONE:
+        if unit == Unit.NONE:
             return str
         else:
             return float

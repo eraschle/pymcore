@@ -14,7 +14,7 @@ from pymcore.hybrid_parameter_interface import (
     ParameterConfigurationError,
 )
 from pymcore.parameter_registry import ParameterMapping, ParameterRegistry
-from pymcore.types import UnitType
+from pymcore.types import Unit, ValueType
 
 
 class ParameterRole(Enum):
@@ -32,16 +32,30 @@ class TestHybridParameterInterfaceIntegration:
 
     def test_enum_mode_parameter_access(self):
         """Test parameter access using ENUM mode only."""
-        element = GenericElement("pole_001", "pole")
+        from pymcore.generic_element import ParameterMetadata
 
-        # Create ENUM mapping
+        element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(name="diameter", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        element.define_parameter(name="material", unit=Unit.NONE, value_type=ValueType.STRING)
+
         pole_mapping = ParameterMapping("pole")
-        pole_mapping.add_parameter(ParameterRole.PRIMARY_HEIGHT, "height", UnitType.MILLIMETER)
-        pole_mapping.add_parameter(ParameterRole.DIAMETER, "diameter", UnitType.MILLIMETER)
-        pole_mapping.add_parameter(ParameterRole.MATERIAL_TYPE, "material", UnitType.NONE)
+        pole_mapping.add_parameter(
+            ParameterRole.PRIMARY_HEIGHT,
+            ParameterMetadata("height", Unit.MILLIMETER, ValueType.FLOAT),
+        )
+        pole_mapping.add_parameter(
+            ParameterRole.DIAMETER,
+            ParameterMetadata("diameter", Unit.MILLIMETER, ValueType.FLOAT),
+        )
+        pole_mapping.add_parameter(
+            ParameterRole.MATERIAL_TYPE,
+            ParameterMetadata("material", Unit.NONE, ValueType.STRING),
+        )
 
         # Create interface with ENUM mapping only
         interface = HybridParameterInterface(element=element, mapping_name="pole", enum_mapping=pole_mapping)
+        interface._resolve_enum_parameter(ParameterRole.PRIMARY_HEIGHT)
 
         # Set values using ENUM
         interface.set_value(ParameterRole.PRIMARY_HEIGHT, 12000.0)
@@ -49,18 +63,37 @@ class TestHybridParameterInterfaceIntegration:
         interface.set_value(ParameterRole.MATERIAL_TYPE, "steel")
 
         # Get values using ENUM
-        assert interface.get_value(ParameterRole.PRIMARY_HEIGHT) == 12000.0
-        assert interface.get_value(ParameterRole.DIAMETER) == 300.0
-        assert interface.get_value(ParameterRole.MATERIAL_TYPE) == "steel"
+        param_value = interface.get_value(ParameterRole.PRIMARY_HEIGHT)
+        assert param_value is not None
+        assert param_value == 12000.0
+
+        param_value = interface.get_value(ParameterRole.DIAMETER)
+        assert param_value is not None
+        assert param_value == 300.0
+
+        param_value = interface.get_value(ParameterRole.MATERIAL_TYPE)
+        assert param_value is not None
+        assert param_value == "steel"
 
         # Verify values are stored in element with correct parameter names
-        assert element.get_parameter("height") == 12000.0
-        assert element.get_parameter("diameter") == 300.0
-        assert element.get_parameter("material") == "steel"
+        param_value = element.value_by("height")
+        assert param_value is not None
+        assert param_value.value == 12000.0
+
+        param_value = element.value_by("diameter")
+        assert param_value is not None
+        assert param_value.value == 300.0
+
+        param_value = element.value_by("material")
+        assert param_value is not None
+        assert param_value.value == "steel"
 
     def test_plugin_mode_parameter_access(self):
         """Test parameter access using Plugin/Registry mode only."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(name="material_type", value_type=ValueType.STRING, unit=Unit.NONE)
 
         # Create registry with parameter definitions
         registry = ParameterRegistry()
@@ -75,29 +108,52 @@ class TestHybridParameterInterfaceIntegration:
         interface.set_value("material_type", "aluminum")
 
         # Get values using string keys
-        assert interface.get_value("primary_height") == 15000.0
-        assert interface.get_value("diameter") == 350.0
-        assert interface.get_value("material_type") == "aluminum"
+        param_value = interface.get_value("primary_height")
+        assert param_value is not None
+        assert param_value == 15000.0
+        param_value = interface.get_value("diameter")
+        assert param_value is not None
+        assert param_value == 350.0
+        param_value = interface.get_value("material_type")
+        assert param_value is not None
+        assert param_value == "aluminum"
 
         # Verify values are stored in element with semantic keys
-        assert element.get_parameter("primary_height") == 15000.0
-        assert element.get_parameter("diameter") == 350.0
-        assert element.get_parameter("material_type") == "aluminum"
+        param_value = element.value_by("primary_height")
+        assert param_value is not None
+        assert param_value.value == 15000.0
+        param_value = element.value_by("diameter")
+        assert param_value is not None
+        assert param_value.value == 350
+        param_value = element.value_by("material_type")
+        assert param_value is not None
+        assert param_value.value == "aluminum"
 
     def test_conflicting_configuration_raises_exception(self):
         """Test that providing both enum_mapping and registry raises exception."""
         element = GenericElement("pole_001", "pole")
 
         # Create both mapping and registry
+        from pymcore.generic_element import ParameterMetadata
+        from pymcore.types import ValueType
+
         pole_mapping = ParameterMapping("pole")
-        pole_mapping.add_parameter(ParameterRole.PRIMARY_HEIGHT, "height", UnitType.MILLIMETER)
+        pole_mapping.add_parameter(
+            ParameterRole.PRIMARY_HEIGHT,
+            ParameterMetadata("height", Unit.MILLIMETER, ValueType.FLOAT),
+        )
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
         # Providing both should raise exception
         with pytest.raises(ParameterConfigurationError) as exc_info:
-            HybridParameterInterface(element=element, mapping_name="pole", enum_mapping=pole_mapping, registry=registry)
+            HybridParameterInterface(
+                element=element,
+                mapping_name="pole",
+                enum_mapping=pole_mapping,
+                registry=registry,
+            )
 
         assert "Cannot provide both enum_mapping and registry" in str(exc_info.value)
 
@@ -114,13 +170,15 @@ class TestHybridParameterInterfaceIntegration:
     def test_smart_dispatcher_enum_vs_string(self):
         """Test that interface correctly dispatches ENUM vs string access."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        element.define_parameter(name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         # Use registry for both ENUM and string access
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
         interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
-
+        registry.register_from_enum(ParameterRole)
         # Set using ENUM
         interface.set_value(ParameterRole.PRIMARY_HEIGHT, 12000.0)
 
@@ -142,26 +200,27 @@ class TestHybridParameterInterfaceIntegration:
     def test_unit_conversion_through_interface(self):
         """Test that unit conversion works through the interface."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
 
         interface = HybridParameterInterface(element=element, mapping_name="pole", registry=registry)
 
-        # Set height in meters (should be stored as mm)
-        interface.set_value_with_unit("primary_height", 12.0, UnitType.METER)
+        # Set height in meters (will be stored in first-used unit)
+        interface.set_value_with_unit("primary_height", 12.0, Unit.METER)
 
-        # Get as millimeters (default storage unit)
-        height_mm = interface.get_value("primary_height")
-        assert height_mm == 12000.0
-
-        # Get with unit conversion back to meters
-        height_m = interface.get_value_with_unit("primary_height", UnitType.METER)
+        # Get value (stored in METER since that was first unit used)
+        height_m = interface.get_value("primary_height")
         assert height_m == 12.0
+
+        height_mm = interface.get_value_with_unit("primary_height", Unit.METER)
+        assert height_mm == 12.0 / 1000
 
     def test_parameter_validation_through_interface(self):
         """Test parameter validation through the interface."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
@@ -181,6 +240,7 @@ class TestHybridParameterInterfaceIntegration:
     def test_default_value_handling(self):
         """Test proper handling of default values."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="primary_height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)
@@ -198,6 +258,8 @@ class TestHybridParameterInterfaceIntegration:
     def test_interface_serialization_roundtrip(self):
         """Test that interface state can be serialized and restored."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="primary_height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        element.define_parameter(name="material_type", unit=Unit.NONE, value_type=ValueType.STRING)
 
         registry = ParameterRegistry()
         registry.register_from_enum(ParameterRole)

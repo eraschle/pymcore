@@ -6,12 +6,16 @@ automatic dispatching and proper exception handling for conflicts.
 """
 
 from __future__ import annotations
+import logging
+from inspect import Parameter
 from typing import Any
 from enum import Enum
 
-from .generic_element import GenericElement
+from .generic_element import GenericElement, ParameterMetadata
 from .parameter_registry import ParameterRegistry, ParameterMapping
-from .types import UnitType, ValueType
+from .types import Unit, ValueType
+
+log = logging.getLogger(__name__)
 
 
 class ParameterConfigurationError(Exception):
@@ -75,7 +79,7 @@ class HybridParameterInterface:
         self._is_enum_mode = enum_mapping is not None
         self._is_plugin_mode = registry is not None
 
-    def set_value(self, role_or_key: Enum | str, value: Any) -> None:
+    def set_value(self, role_or_key: Enum | str, value: Any, unit: Unit | None = None) -> None:
         """
         Set parameter value using smart dispatching.
 
@@ -85,11 +89,13 @@ class HybridParameterInterface:
             ENUM role or string key for the parameter
         value : Any
             Value to set
+        unit : UnitType
+            Unit of the input value
         """
         if isinstance(role_or_key, Enum):
-            self._set_enum_value(role_or_key, value)
+            self._set_enum_value(role_or_key, value, unit)
         else:
-            self._set_string_value(role_or_key, value)
+            self._set_string_value(role_or_key, value, unit)
 
     def get_value(self, role_or_key: Enum | str, default: Any = None) -> Any:
         """
@@ -112,7 +118,7 @@ class HybridParameterInterface:
         else:
             return self._get_string_value(role_or_key, default)
 
-    def set_value_with_unit(self, role_or_key: Enum | str, value: Any, unit: UnitType) -> None:
+    def set_value_with_unit(self, role_or_key: Enum | str, value: Any, unit: Unit) -> None:
         """
         Set parameter value with explicit unit conversion.
 
@@ -130,13 +136,10 @@ class HybridParameterInterface:
         else:
             param_name, target_unit = self._resolve_string_parameter(role_or_key)
 
-        # Determine value type
-        value_type = self._infer_value_type(value)
-
         # Set with unit conversion
-        self._element.set_parameter(param_name, value, unit, target_unit, value_type)
+        self._element.set_value(param_name, value, target_unit)
 
-    def get_value_with_unit(self, role_or_key: Enum | str, unit: UnitType, default: Any = None) -> Any:
+    def get_value_with_unit(self, role_or_key: Enum | str, unit: Unit, default: Any = None) -> Any:
         """
         Get parameter value with unit conversion.
 
@@ -159,7 +162,11 @@ class HybridParameterInterface:
         else:
             param_name, _ = self._resolve_string_parameter(role_or_key)
 
-        return self._element.get_parameter(param_name, default, unit)
+        param_value = self._element.value_by(param_name, default)
+        if param_value is None:
+            log.warning(f"Parameter {param_name} not found.")
+            return default
+        return param_value.convert_to(unit, default_value=default)
 
     def validate_value(self, role_or_key: Enum | str, value: Any) -> bool:
         """
@@ -244,31 +251,37 @@ class HybridParameterInterface:
             # ENUM mode restoration would require additional implementation
             raise NotImplementedError("ENUM mapping restoration not yet implemented")
 
-    def _set_enum_value(self, role: Enum, value: Any) -> None:
+    def _set_enum_value(self, role: Enum, value: Any, unit: Unit | None) -> None:
         """Set parameter value using ENUM role."""
-        param_name, unit = self._resolve_enum_parameter(role)
-        value_type = self._infer_value_type(value)
-
-        self._element.set_parameter(param_name, value, unit, value_type=value_type)
+        param_name, role_unit = self._resolve_enum_parameter(role)
+        if unit is None or unit == Unit.NONE:
+            unit = role_unit
+        self._element.set_value(param_name, value, unit)
 
     def _get_enum_value(self, role: Enum, default: Any = None) -> Any:
         """Get parameter value using ENUM role."""
         param_name, _ = self._resolve_enum_parameter(role)
-        return self._element.get_parameter(param_name, default)
+        param_value = self._element.value_by(param_name)
+        if param_value is None:
+            return default
+        return param_value.value
 
-    def _set_string_value(self, key: str, value: Any) -> None:
+    def _set_string_value(self, key: str, value: Any, unit: Unit | None) -> None:
         """Set parameter value using string key."""
-        param_name, unit = self._resolve_string_parameter(key)
-        value_type = self._infer_value_type(value)
-
-        self._element.set_parameter(param_name, value, unit, value_type=value_type)
+        param_name, ley_unit = self._resolve_string_parameter(key)
+        if unit is None or unit == Unit.NONE:
+            unit = ley_unit
+        self._element.set_value(param_name, value, unit)
 
     def _get_string_value(self, key: str, default: Any = None) -> Any:
         """Get parameter value using string key."""
         param_name, _ = self._resolve_string_parameter(key)
-        return self._element.get_parameter(param_name, default)
+        param_value = self._element.value_by(param_name)
+        if param_value is None:
+            return default
+        return param_value.value
 
-    def _resolve_enum_parameter(self, role: Enum) -> tuple[str, UnitType]:
+    def _resolve_enum_parameter(self, role: Enum) -> tuple[str, Unit]:
         """Resolve ENUM role to parameter name and unit."""
         if self._is_enum_mode and self._enum_mapping:
             param_name = self._enum_mapping.get_parameter_name(role)
@@ -277,12 +290,12 @@ class HybridParameterInterface:
             if param_name is None:
                 raise ValueError(f"ENUM role {role} not found in mapping")
 
-            return param_name, unit or UnitType.NONE
+            return param_name, unit or Unit.NONE
         else:
             # In plugin mode, use semantic key directly
-            return role.value, UnitType.MILLIMETER  # Default assumption
+            return role.value, Unit.MILLIMETER  # Default assumption
 
-    def _resolve_string_parameter(self, key: str) -> tuple[str, UnitType]:
+    def _resolve_string_parameter(self, key: str) -> tuple[str, Unit]:
         """Resolve string key to parameter name and unit."""
         if self._is_plugin_mode and self._registry:
             descriptor = self._registry.get_parameter(key)
@@ -290,7 +303,7 @@ class HybridParameterInterface:
                 return key, descriptor.unit  # In plugin mode, key IS the parameter name
             else:
                 # Parameter not in registry, use defaults
-                return key, UnitType.NONE
+                return key, Unit.NONE
         elif self._enum_mapping:
             # In ENUM mode, string keys map to whatever the ENUM mapping defines
             # Try to find a matching ENUM role with the same value
@@ -299,7 +312,7 @@ class HybridParameterInterface:
                     return self._resolve_enum_parameter(role)
 
         # If no matching ENUM role found, use string key directly with defaults
-        return key, UnitType.NONE
+        return key, Unit.NONE
 
     def _infer_value_type(self, value: Any) -> ValueType:
         """Infer ValueType from Python value."""

@@ -16,6 +16,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
+class ParameterDescriptionError(Exception):
+    pass
+
+
 class ParameterDescriptor:
     """
     Descriptor that provides automatic parameter synchronization.
@@ -35,27 +39,42 @@ class ParameterDescriptor:
         default_value : float
             Default value if parameter doesn't exist
         """
-        self.parameter_name = parameter_name
+        self.param_name = parameter_name
         self.default_value = default_value
 
     def __get__(self, obj: ElementGeometry | None, objtype=None) -> float:
         """Get parameter value from element."""
         if obj is None:
-            logger.error(f"Accessing {self.parameter_name} on None object - return {self.default_value}")
+            logger.error(
+                f"Accessing {self.param_name} on None object - return {self.default_value}"
+            )
             return self.default_value
 
-        return obj._element.get_parameter(self.parameter_name, self.default_value)
+        existing_value = obj._element.value_by(
+            self.param_name, default=self.default_value
+        )
+        if existing_value is None:
+            logger.error(
+                f"Accessing Value {existing_value} of {self.param_name} on {obj._element}"
+            )
+            raise ParameterDescriptionError(
+                f"Parameter {self.param_name} has not been defined in element"
+            )
+
+        existing_value = obj._element.value_by(
+            self.param_name, default=self.default_value
+        )
+        if existing_value is None:
+            logger.warning(
+                f"Parameter {self.param_name} not found, returning default {self.default_value}"
+            )
+            return self.default_value
+
+        return existing_value.value
 
     def __set__(self, obj: ElementGeometry, value: float) -> None:
         """Set parameter value in element."""
-        from .types import UnitType, ValueType
-
-        obj._element.set_parameter(
-            self.parameter_name,
-            value,
-            UnitType.MILLIMETER,  # Default unit for geometry
-            value_type=ValueType.FLOAT,
-        )
+        obj._element.set_value(self.param_name, value, unit=None)
 
 
 class ElementGeometry:
@@ -109,7 +128,7 @@ class ElementGeometry:
         geometric_params = ["height", "width", "length", "depth", "diameter"]
 
         for param in geometric_params:
-            if self._element.has_parameter(param):
+            if self._element.has_value(param):
                 dimensions[param] = getattr(self, param)
 
         return dimensions
@@ -160,7 +179,14 @@ class ElementGeometry:
         dimensions = self.get_dimensions()
 
         # Default centered at origin
-        bbox = {"min_x": 0.0, "max_x": 0.0, "min_y": 0.0, "max_y": 0.0, "min_z": 0.0, "max_z": 0.0}
+        bbox = {
+            "min_x": 0.0,
+            "max_x": 0.0,
+            "min_y": 0.0,
+            "max_y": 0.0,
+            "min_z": 0.0,
+            "max_z": 0.0,
+        }
 
         # Update based on available dimensions
         if "width" in dimensions:

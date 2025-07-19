@@ -6,9 +6,13 @@ and lazy loading capabilities without Core knowing container specifics.
 """
 
 import pytest
-from pymcore.container_extension import ContainerExtension, ContainerRegistry, ContainerNotFoundError
+from pymcore.container_extension import (
+    ContainerExtension,
+    ContainerRegistry,
+    ContainerNotFoundError,
+)
 from pymcore.generic_element import GenericElement
-from pymcore.types import UnitType
+from pymcore.types import Unit, ValueType
 
 
 class GeometryContainer(ContainerExtension):
@@ -114,7 +118,10 @@ class TestContainerExtensionIntegration:
         registry.register_container_type(MaterialContainer)
 
         # Create geometry container from data
-        geometry_data = {"vertices": [(0.0, 0.0, 0.0), (1000.0, 0.0, 0.0), (1000.0, 1000.0, 0.0)], "vertex_count": 3}
+        geometry_data = {
+            "vertices": [(0.0, 0.0, 0.0), (1000.0, 0.0, 0.0), (1000.0, 1000.0, 0.0)],
+            "vertex_count": 3,
+        }
 
         geometry_container = registry.create_container("geometry", geometry_data)
         assert geometry_container is not None
@@ -122,7 +129,10 @@ class TestContainerExtensionIntegration:
         assert len(geometry_container.vertices) == 3
 
         # Create material container from data
-        material_data = {"material_type": "steel", "properties": {"density": 7850.0, "yield_strength": 355.0}}
+        material_data = {
+            "material_type": "steel",
+            "properties": {"density": 7850.0, "yield_strength": 355.0},
+        }
 
         material_container = registry.create_container("material", material_data)
         assert material_container is not None
@@ -143,10 +153,12 @@ class TestContainerExtensionIntegration:
     def test_generic_element_container_integration(self):
         """Test GenericElement integration with containers."""
         element = GenericElement("pole_001", "pole")
+        element.define_parameter(name="height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        element.define_parameter(name="diameter", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
 
         # Set basic parameters
-        element.set_parameter("height", 12000.0, UnitType.MILLIMETER)
-        element.set_parameter("diameter", 300.0, UnitType.MILLIMETER)
+        element.set_value("height", 12000.0, Unit.MILLIMETER)
+        element.set_value("diameter", 300.0, Unit.MILLIMETER)
 
         # Add geometry container
         geometry = GeometryContainer()
@@ -180,8 +192,10 @@ class TestContainerExtensionIntegration:
         """Test element serialization/deserialization with containers."""
         # Create element with containers
         original = GenericElement("foundation_001", "foundation")
-        original.set_parameter("width", 2000.0, UnitType.MILLIMETER)
-        original.set_parameter("length", 3000.0, UnitType.MILLIMETER)
+        original.define_parameter(name="width", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        original.define_parameter(name="length", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        original.set_value("width", 2000.0, Unit.MILLIMETER)
+        original.set_value("length", 3000.0, Unit.MILLIMETER)
 
         # Add containers
         geometry = GeometryContainer()
@@ -200,8 +214,12 @@ class TestContainerExtensionIntegration:
         restored = GenericElement.from_dict(data)
 
         # Verify parameters preserved
-        assert restored.get_parameter("width") == 2000.0
-        assert restored.get_parameter("length") == 3000.0
+        param_value = restored.value_by("width")
+        assert param_value is not None
+        assert param_value.value == 2000.0
+        param_value = restored.value_by("length")
+        assert param_value is not None
+        assert param_value.value == 3000.0
 
         # Verify containers preserved
         assert restored.has_container("geometry")
@@ -224,7 +242,7 @@ class TestContainerExtensionIntegration:
 
         # Create element with containers
         element = GenericElement("pole_001", "pole")
-        element.set_parameter("height", 15000.0, UnitType.MILLIMETER)
+        element.set_value("height", 15000.0, Unit.MILLIMETER)
 
         # Add containers
         geometry = GeometryContainer([(0.0, 0.0, 0.0), (0.0, 0.0, 15000.0)])

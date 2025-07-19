@@ -5,27 +5,40 @@ Provides a flexible architecture for modeling infrastructure elements
 with hybrid parameter management and extensible container system.
 """
 
-from .types import ValueType, UnitType
+from .types import ValueType, Unit
 from .unit_converter import UnitConverter, UnitConversionError
-from .generic_element import GenericElement
+from .generic_element import GenericElement, ParameterMetadata, ParameterNotDefinedError
 from .geometry import ElementGeometry, ParameterDescriptor as GeometryParameterDescriptor
 from .parameter_descriptor import ParameterDescriptor
 from .parameter_registry import ParameterRegistry, ParameterMapping
 from .hybrid_parameter_interface import HybridParameterInterface, ParameterConfigurationError
 from .container_extension import ContainerExtension, ContainerRegistry, ContainerNotFoundError
 from .element_repository import ElementRepository, RepositoryError
+from .helper import (
+    is_int,
+    as_int,
+    is_str,
+    as_str,
+    is_float,
+    as_float,
+    is_bool,
+    as_bool,
+    ValueConversionError,
+)
 
 __version__ = "0.1.0"
 
 __all__ = [
     "ValueType",
-    "UnitType", 
+    "Unit",
     "UnitConverter",
     "UnitConversionError",
     "GenericElement",
     "ElementGeometry",
-    "GeometryParameterDescriptor", 
+    "GeometryParameterDescriptor",
     "ParameterDescriptor",
+    "ParameterMetadata",
+    "ParameterNotDefinedError",
     "ParameterRegistry",
     "ParameterMapping",
     "HybridParameterInterface",
@@ -34,5 +47,14 @@ __all__ = [
     "ContainerRegistry",
     "ContainerNotFoundError",
     "ElementRepository",
-    "RepositoryError"
+    "RepositoryError",
+    "is_int",
+    "as_int",
+    "is_str",
+    "as_str",
+    "is_float",
+    "as_float",
+    "is_bool",
+    "as_bool",
+    "ValueConversionError",
 ]

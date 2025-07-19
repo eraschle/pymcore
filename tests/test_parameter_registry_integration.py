@@ -6,9 +6,15 @@ for railway infrastructure parameters.
 """
 
 from enum import Enum
-from pymcore.parameter_registry import ParameterRegistry, ParameterMapping
-from pymcore.parameter_descriptor import ParameterDescriptor
-from pymcore.types import UnitType
+
+from pymcore import (
+    ParameterDescriptor,
+    ParameterMapping,
+    ParameterMetadata,
+    ParameterRegistry,
+    Unit,
+    ValueType,
+)
 
 
 class ParameterRole(Enum):
@@ -48,13 +54,13 @@ class TestParameterRegistryIntegration:
         assert height_desc is not None
         assert height_desc.semantic_key == "primary_height"
         assert height_desc.data_type is float
-        assert height_desc.unit == UnitType.MILLIMETER  # Default for dimensions
+        assert height_desc.unit == Unit.MILLIMETER  # Default for dimensions
 
         # Verify string parameters
         material_desc = registry.get_parameter("material_type")
         assert material_desc is not None
         assert material_desc.data_type is str
-        assert material_desc.unit == UnitType.NONE
+        assert material_desc.unit == Unit.NONE
 
     def test_custom_parameter_descriptor_registration(self):
         """Test registration of custom parameter descriptors."""
@@ -64,7 +70,7 @@ class TestParameterRegistryIntegration:
         custom_desc = ParameterDescriptor(
             semantic_key="custom_load",
             data_type=float,
-            unit=UnitType.KILOGRAM,
+            unit=Unit.KILOGRAM,
             required=False,
             default_value=0.0,
             description="Custom load parameter",
@@ -85,9 +91,12 @@ class TestParameterRegistryIntegration:
 
         # Create mapping for pole elements
         pole_mapping = ParameterMapping("pole")
-        pole_mapping.add_parameter(ParameterRole.PRIMARY_HEIGHT, "height", UnitType.MILLIMETER)
-        pole_mapping.add_parameter(ParameterRole.DIAMETER, "diameter", UnitType.MILLIMETER)
-        pole_mapping.add_parameter(ParameterRole.MATERIAL_TYPE, "material", UnitType.NONE)
+        parameter = ParameterMetadata(name="height", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        pole_mapping.add_parameter(role=ParameterRole.PRIMARY_HEIGHT, parameter=parameter)
+        parameter = ParameterMetadata(name="diameter", value_type=ValueType.FLOAT, unit=Unit.MILLIMETER)
+        pole_mapping.add_parameter(role=ParameterRole.DIAMETER, parameter=parameter)
+        parameter = ParameterMetadata(name="material", value_type=ValueType.FLOAT, unit=Unit.NONE)
+        pole_mapping.add_parameter(role=ParameterRole.MATERIAL_TYPE, parameter=parameter)
 
         # Register mapping
         registry.register_enum_mapping("pole", pole_mapping)
@@ -102,7 +111,7 @@ class TestParameterRegistryIntegration:
         assert height_param == "height"
 
         height_unit = retrieved_mapping.get_parameter_unit(ParameterRole.PRIMARY_HEIGHT)
-        assert height_unit == UnitType.MILLIMETER
+        assert height_unit == Unit.MILLIMETER
 
     def test_registry_parameter_lookup_integration(self):
         """Test integrated parameter lookup across ENUM and Plugin systems."""
@@ -111,9 +120,7 @@ class TestParameterRegistryIntegration:
         # Register both ENUM and custom parameters
         registry.register_from_enum(ParameterRole)
 
-        custom_desc = ParameterDescriptor(
-            semantic_key="special_coating", data_type=str, unit=UnitType.NONE, required=False
-        )
+        custom_desc = ParameterDescriptor(semantic_key="special_coating", data_type=str, unit=Unit.NONE, required=False)
         registry.register_parameter(custom_desc)
 
         # Test lookup of ENUM-derived parameter
