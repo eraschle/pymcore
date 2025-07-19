@@ -46,12 +46,8 @@ class TestElementRepositoryIntegration:
 
         # Create element with parameters and containers
         element = GenericElement("pole_001", "pole")
-        element.define_parameter(
-            "height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
-        )
-        element.define_parameter(
-            "material", unit=Unit.NONE, value_type=ValueType.STRING
-        )
+        element.define_parameter("height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        element.define_parameter("material", unit=Unit.NONE, value_type=ValueType.STRING)
         element.set_value("height", 12000.0, Unit.MILLIMETER)
         element.set_value("material", "steel", Unit.NONE)
 
@@ -88,28 +84,18 @@ class TestElementRepositoryIntegration:
 
         # Create multiple elements
         pole = GenericElement("pole_001", "pole")
-        pole.define_parameter(
-            "height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
-        )
+        pole.define_parameter("height", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
         pole.set_value("height", 12000.0, unit=Unit.MILLIMETER)
 
         foundation = GenericElement("foundation_001", "foundation")
-        foundation.define_parameter(
-            "width", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
-        )
-        foundation.define_parameter(
-            "length", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
-        )
+        foundation.define_parameter("width", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        foundation.define_parameter("length", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
         foundation.set_value("width", 2000.0, unit=Unit.MILLIMETER)
         foundation.set_value("length", 3000.0, unit=Unit.MILLIMETER)
 
         track = GenericElement("track_001", "track")
-        track.define_parameter(
-            "length", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
-        )
-        track.define_parameter(
-            "gauge", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT
-        )
+        track.define_parameter("length", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
+        track.define_parameter("gauge", unit=Unit.MILLIMETER, value_type=ValueType.FLOAT)
         track.set_value("length", 25000.0, unit=Unit.MILLIMETER)
         track.set_value("gauge", 1435.0, unit=Unit.MILLIMETER)
 
@@ -159,13 +145,11 @@ class TestElementRepositoryIntegration:
         assert ref_info["target_type"] == "foundation"
 
         # Resolve reference to actual object
-        referenced_foundation = repo.resolve_object_reference(
-            loaded_pole, "foundation_connection"
-        )
+        referenced_foundation = repo.resolve_object_reference(loaded_pole, "foundation_connection")
         assert referenced_foundation is not None
         assert referenced_foundation.element_id == "foundation_456"
 
-        ref_element = repo.resolve_object_reference(loaded_pole, "foundation_connection")  
+        ref_element = repo.resolve_object_reference(loaded_pole, "foundation_connection")
         assert ref_element is not None
         param_value = ref_element.value_by("width")
         assert param_value is not None
@@ -221,14 +205,12 @@ class TestElementRepositoryIntegration:
             assert loaded_pole.has_container("test_container")
 
             # Verify foundation
-            loaded_foundation = next(
-                e for e in loaded_elements if e.element_id == "foundation_001"
-            )
+            loaded_foundation = next(e for e in loaded_elements if e.element_id == "foundation_001")
             foundation_width = loaded_foundation.value_by("width")
             assert foundation_width is not None
             assert foundation_width.value == 2000.0
             foundation_grade = loaded_foundation.value_by("concrete_grade")
-            assert foundation_grade is not None  
+            assert foundation_grade is not None
             assert foundation_grade.value == "C30/37"
 
         finally:
@@ -253,9 +235,7 @@ class TestElementRepositoryIntegration:
         assert loaded_element is not None
 
         # Use repository method to reconstruct container
-        reconstructed_container = repo.reconstruct_container(
-            loaded_element, "test_container"
-        )
+        reconstructed_container = repo.reconstruct_container(loaded_element, "test_container")
 
         assert reconstructed_container is not None
         assert isinstance(reconstructed_container, MockContainerForRepo)

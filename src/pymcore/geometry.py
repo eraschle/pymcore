@@ -50,20 +50,14 @@ class ParameterDescriptor:
             )
             return self.default_value
 
-        existing_value = obj._element.value_by(
-            self.param_name, default=self.default_value
-        )
+        existing_value = obj._element.value_by(self.param_name, default=self.default_value)
         if existing_value is None:
-            logger.error(
-                f"Accessing Value {existing_value} of {self.param_name} on {obj._element}"
-            )
+            logger.error(f"Accessing Value {existing_value} of {self.param_name} on {obj._element}")
             raise ParameterDescriptionError(
                 f"Parameter {self.param_name} has not been defined in element"
             )
 
-        existing_value = obj._element.value_by(
-            self.param_name, default=self.default_value
-        )
+        existing_value = obj._element.value_by(self.param_name, default=self.default_value)
         if existing_value is None:
             logger.warning(
                 f"Parameter {self.param_name} not found, returning default {self.default_value}"

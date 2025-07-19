@@ -253,7 +253,9 @@ class GenericElement:
         existing_value.set_value(value, unit)
         self._update_geometry_if_needed(name, value)
 
-    def _create_value_from_definition(self, param_name: str, default: Any | None = None) -> ParameterValue | None:
+    def _create_value_from_definition(
+        self, param_name: str, default: Any | None = None
+    ) -> ParameterValue | None:
         """
         Get a parameter value object by name.
 
