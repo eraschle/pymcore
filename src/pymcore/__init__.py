@@ -11,6 +11,7 @@ from .generic_element import GenericElement
 from .geometry import ElementGeometry, ParameterDescriptor as GeometryParameterDescriptor
 from .parameter_descriptor import ParameterDescriptor
 from .parameter_registry import ParameterRegistry, ParameterMapping
+from .hybrid_parameter_interface import HybridParameterInterface, ParameterConfigurationError
 
 __version__ = "0.1.0"
 
@@ -24,5 +25,7 @@ __all__ = [
     "GeometryParameterDescriptor", 
     "ParameterDescriptor",
     "ParameterRegistry",
-    "ParameterMapping"
+    "ParameterMapping",
+    "HybridParameterInterface",
+    "ParameterConfigurationError"
 ]
