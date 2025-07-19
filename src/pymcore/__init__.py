@@ -12,6 +12,7 @@ from .geometry import ElementGeometry, ParameterDescriptor as GeometryParameterD
 from .parameter_descriptor import ParameterDescriptor
 from .parameter_registry import ParameterRegistry, ParameterMapping
 from .hybrid_parameter_interface import HybridParameterInterface, ParameterConfigurationError
+from .container_extension import ContainerExtension, ContainerRegistry, ContainerNotFoundError
 
 __version__ = "0.1.0"
 
@@ -27,5 +28,8 @@ __all__ = [
     "ParameterRegistry",
     "ParameterMapping",
     "HybridParameterInterface",
-    "ParameterConfigurationError"
+    "ParameterConfigurationError",
+    "ContainerExtension",
+    "ContainerRegistry",
+    "ContainerNotFoundError"
 ]

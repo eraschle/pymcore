@@ -178,6 +178,81 @@ class GenericElement:
             self._geometry = ElementGeometry(self)
         return self._geometry
     
+    def add_container(self, container_type: str, container_data: Any) -> None:
+        """
+        Add a container to this element.
+        
+        Parameters
+        ----------
+        container_type : str
+            Type identifier for the container
+        container_data : Any
+            Container data (typically from container.serialize())
+        """
+        self._containers[container_type] = container_data
+    
+    def get_container(self, container_type: str) -> Any | None:
+        """
+        Get container data by type.
+        
+        Parameters
+        ----------
+        container_type : str
+            Type identifier for the container
+            
+        Returns
+        -------
+        Any | None
+            Container data if found, None otherwise
+        """
+        return self._containers.get(container_type)
+    
+    def has_container(self, container_type: str) -> bool:
+        """
+        Check if element has a container of the given type.
+        
+        Parameters
+        ----------
+        container_type : str
+            Type identifier for the container
+            
+        Returns
+        -------
+        bool
+            True if container exists
+        """
+        return container_type in self._containers
+    
+    def remove_container(self, container_type: str) -> bool:
+        """
+        Remove a container from this element.
+        
+        Parameters
+        ----------
+        container_type : str
+            Type identifier for the container
+            
+        Returns
+        -------
+        bool
+            True if container was removed, False if not found
+        """
+        if container_type in self._containers:
+            del self._containers[container_type]
+            return True
+        return False
+    
+    def get_container_types(self) -> list[str]:
+        """
+        Get list of all container types in this element.
+        
+        Returns
+        -------
+        list[str]
+            List of container type identifiers
+        """
+        return list(self._containers.keys())
+
     def _update_geometry_if_needed(self, parameter_name: str, value: Any) -> None:
         """Update geometry if this parameter affects geometry."""
         # Only update if geometry already exists (lazy creation)
